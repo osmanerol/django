@@ -6,6 +6,8 @@ from account.serializers import UserSerializer, ChangePasswordSerializer, Regist
 from rest_framework.response import Response
 from rest_framework import status
 from account.permissions import NotAuthenticated
+from django.contrib.auth import update_session_auth_hash
+from account.throttle import RegisterThrottle
 
 class ProfileView(RetrieveUpdateAPIView):
     permission_classes= [IsAuthenticated]
@@ -31,7 +33,7 @@ class UpdatePasswordAPIView(APIView):
         }
         serializer= ChangePasswordSerializer(data= data)
         if serializer.is_valid():
-            old_password= serializer.data.get['old_password']
+            old_password= serializer.data['old_password']
             if not self.object.check_password(old_password): # girilen eski sifre suanki sifresi mi
                 return Response({'old_password': 'wrong password'}, status= status.HTTP_400_BAD_REQUEST)
             self.object.set_password(serializer.data.get('new_password'))
@@ -44,3 +46,4 @@ class CreateUserView(CreateAPIView):
     model= User.objects.all()
     serializer_class= RegisterSerializer
     permission_classes= [NotAuthenticated]
+    throttle_classes= [RegisterThrottle]

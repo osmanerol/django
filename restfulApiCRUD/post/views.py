@@ -12,6 +12,7 @@ class PostListAPIView(ListAPIView, CreateModelMixin):
     serializer_class= PostSerializer
     filter_backends= [SearchFilter, OrderingFilter]
     search_fields= ['title', 'content']
+    throttle_scope = 'user'
 
     def get_queryset(self):
         queryset= Post.objects.filter(draft= False)
